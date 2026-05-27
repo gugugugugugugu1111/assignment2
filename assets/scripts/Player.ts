@@ -36,7 +36,9 @@ export default class Player extends cc.Component {
             case cc.macro.KEY.space:
                 // 加上 if (this.rb) 確保安全
                 if (this.rb) {
-                    this.rb.linearVelocity = cc.v2(this.rb.linearVelocity.x, this.jumpForce);
+                    if (Math.abs(this.rb.linearVelocity.y) < 0.1) {
+                        this.rb.linearVelocity = cc.v2(this.rb.linearVelocity.x, this.jumpForce);
+                    }              
                 }
                 break;
         }

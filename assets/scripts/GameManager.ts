@@ -24,7 +24,7 @@ export default class GameManager extends cc.Component {
         cc.director.getPhysicsManager().enabled = true;
         // 如果需要除錯顯示碰撞框，把下面這行解除註解
         // cc.director.getPhysicsManager().debugDrawFlags = cc.PhysicsManager.DrawBits.e_aabbBit | cc.PhysicsManager.DrawBits.e_shapeBit;
-
+        cc.director.getPhysicsManager().gravity = cc.v2(0, -2000);
         if (this.playerNode) {
             this.spawnPos = this.playerNode.getPosition();
         }
