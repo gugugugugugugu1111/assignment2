@@ -4,9 +4,9 @@ import GameManager from "./GameManager";
 @ccclass
 export default class Player extends cc.Component {
     @property
-    public jumpForce: number = 600; // 2.4.x 物理引擎所需數值較大
+    public jumpForce: number = 900; // 2.4.x 物理引擎所需數值較大
     @property
-    public moveSpeed: number = 300;
+    public moveSpeed: number = 400;
 
     private rb: cc.RigidBody | null= null;
     private moveDirection: number = 0;
