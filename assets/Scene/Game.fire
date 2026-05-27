@@ -10550,6 +10550,7 @@
     "playerNode": {
       "__id__": 270
     },
+    "gameOverPanel": null,
     "_id": "c7Bvwunf1KbrB58WoFL9UG"
   },
   {
@@ -10578,8 +10579,8 @@
     "_batchAsBitmap": false,
     "_styleFlags": 0,
     "_underlineHeight": 0,
-    "_N$horizontalAlign": 1,
-    "_N$verticalAlign": 1,
+    "_N$horizontalAlign": 0,
+    "_N$verticalAlign": 0,
     "_N$fontFamily": "Arial",
     "_N$overflow": 0,
     "_N$cacheMode": 0,
@@ -10622,7 +10623,7 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        -397.754,
+        -396.188,
         286.026,
         0,
         0,
@@ -10800,7 +10801,7 @@
     "_batchAsBitmap": false,
     "_styleFlags": 0,
     "_underlineHeight": 0,
-    "_N$horizontalAlign": 1,
+    "_N$horizontalAlign": 2,
     "_N$verticalAlign": 1,
     "_N$fontFamily": "Arial",
     "_N$overflow": 0,
