@@ -13,6 +13,9 @@ export default class GameManager extends cc.Component {
     @property(cc.Node)
     public playerNode: cc.Node | null= null;
 
+    @property(cc.Node)
+    public gameOverPanel: cc.Node | null = null;
+
     private score: number = 0;
     private life: number = 3;
     private spawnPos: cc.Vec2 | null= null;
@@ -59,7 +62,26 @@ export default class GameManager extends cc.Component {
 
     private gameOver() {
         cc.log("Game Over!");
-        // cc.director.loadScene("GameOverScene"); 
+        
+        // 1. 暫停物理引擎，讓角色和怪物停下來
+        cc.director.getPhysicsManager().enabled = false;
+        
+        // 2. 顯示 Game Over UI 畫面（取代原本的 alert）
+        if (this.gameOverPanel) {
+            this.gameOverPanel.active = true;
+        }
+    }
+
+    // 🎯 新增：給「再試一次」按鈕綁定的點擊事件
+    public onRestartBtnClicked() {
+        // 重新載入當前的遊戲場景（請確保 "Game" 是你當前場景的精確名稱）
+        cc.director.loadScene("Game");
+    }
+
+    // 🎯 新增：給「回主選單」按鈕綁定的點擊事件
+    public onBackToMenuBtnClicked() {
+        // 切換到主選單場景（等一下教你新建）
+        cc.director.loadScene("Menu");
     }
 
     private updateUI() {
