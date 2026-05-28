@@ -32,7 +32,6 @@ export default class BlockController extends cc.Component {
     }
 
     boxTriggered () {
-        cc.log("問號磚塊被頂到了！");
 
         if (this.hitSound) {
             cc.audioEngine.playEffect(this.hitSound, false);

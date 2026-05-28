@@ -128,7 +128,6 @@ export default class Player extends cc.Component {
     this.scheduleOnce(() => {
             this.shrink();
         }, 10);
-    cc.log("瑪利歐成長了！新的縮放基準為: " + this.originalScaleX);
     }
     public shrink() {
 
@@ -140,7 +139,6 @@ export default class Player extends cc.Component {
             .to(0.1, { scale: this.originalScaleX }) 
             .start();
 
-        cc.log("10秒到了，瑪利歐變回原狀！");
     }
 }
 

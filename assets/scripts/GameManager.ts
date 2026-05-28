@@ -1,5 +1,5 @@
 const {ccclass, property} = cc._decorator;
-
+import FirebaseManager from "./firebase"
 @ccclass
 export default class GameManager extends cc.Component {
     public static instance: GameManager | null = null;
@@ -137,7 +137,9 @@ export default class GameManager extends cc.Component {
         
         if (this.gameOverPanel) {
             this.gameOverPanel.active = true;
-            
+            if (FirebaseManager.instance) {
+                FirebaseManager.instance.saveScore(this.score, this.timer); 
+            }
             if (this.conclude) {
                 if(this.win > 0) {
                     this.conclude.string = `You Win!`;
