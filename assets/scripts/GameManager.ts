@@ -31,6 +31,21 @@ export default class GameManager extends cc.Component {
     @property(cc.Label)
     public conclude: cc.Label | null = null;
 
+    @property(cc.AudioClip)
+    public bgmClip: cc.AudioClip | null = null;
+
+    @property(cc.AudioClip)
+    public dieClip: cc.AudioClip | null = null;
+
+    @property(cc.AudioClip)
+    public stompClip: cc.AudioClip | null = null; 
+
+    @property(cc.AudioClip)
+    public winClip: cc.AudioClip | null = null;
+
+    @property(cc.AudioClip)
+    public loseClip: cc.AudioClip | null = null;
+
     private isInvincible: boolean = false;  
     private score: number = 0;
     private life: number = 3;
@@ -52,20 +67,23 @@ export default class GameManager extends cc.Component {
         if (this.gameOverPanel) {
             this.gameOverPanel.active = false;
         }
-        
+        if (this.bgmClip) {
+            cc.audioEngine.playMusic(this.bgmClip, true);
+        }
         this.updateUI();
     }
 
     public addScore(points: number) {
-        if (this.isGameEnded) return; // 遊戲結束後不給加分
+        if (this.isGameEnded) return; 
         this.score += points;
         this.updateUI();
     }
 
     public loseLife() {
-        // 🎯 防護：如果遊戲已經結束或正在無敵，直接略過
         if (this.isGameEnded || this.isInvincible) return;
 
+        if (this.dieClip) cc.audioEngine.playEffect(this.dieClip, false);
+        
         this.isInvincible = true;
         this.life--;
 
@@ -73,7 +91,7 @@ export default class GameManager extends cc.Component {
         this.updateUI();
 
         if (this.life <= 0) {
-            this.isGameEnded = true; // 🎯 鎖死遊戲狀態
+            this.isGameEnded = true; 
             this.gameOver();
         } else {
             this.respawnPlayer();
@@ -95,17 +113,26 @@ export default class GameManager extends cc.Component {
     }
 
     public winGame() {
-        if (this.isGameEnded) return; // 🎯 防止連續觸發兩次勝利
+        if (this.isGameEnded) return; 
         cc.log("You Win!");
+        cc.audioEngine.stopMusic();
+        if (this.winClip) cc.audioEngine.playEffect(this.winClip, false);
         this.win = 1;
-        this.isGameEnded = true; // 🎯 鎖死遊戲狀態
+        this.isGameEnded = true; 
         this.gameOver();
     }
 
     private gameOver() {
         cc.log("Game Over Sequence Started!");
-        
-        // 1. 暫停物理引擎
+        cc.audioEngine.stopMusic(); 
+
+        if (this.win > 0) {
+            if (this.winClip)
+            cc.audioEngine.playEffect(this.winClip, false);
+        } else {
+            if (this.loseClip)
+            cc.audioEngine.playEffect(this.loseClip, false);
+        }
         cc.director.getPhysicsManager().enabled = false;
         
         if (this.gameOverPanel) {
@@ -119,7 +146,7 @@ export default class GameManager extends cc.Component {
                 }
             }
             if (this.finalScoreLabel) {
-                this.finalScoreLabel.string = `Final Score: ${this.score + Math.floor(this.timer)*15 + this.win*1000 + this.life*500}`;
+                this.finalScoreLabel.string = `Final Score: ${this.score + Math.floor(this.timer)*50*this.win + this.win*1000 + this.life*500*this.win}`;
             }
             if (this.finalTimeLabel) {
                 this.finalTimeLabel.string = `Final Time: ${Math.floor(this.timer)} s`;
@@ -138,8 +165,11 @@ export default class GameManager extends cc.Component {
         cc.director.loadScene("Menu");
     }
 
+    public playStompSound() {
+        if (this.stompClip) cc.audioEngine.playEffect(this.stompClip, false);
+    }
+
     update (dt: number) {
-        // 🎯 終極防線：只要遊戲一結束（包含勝利或死亡），update 後面的計時器代碼絕對不會再執行！
         if (this.isGameEnded) return;
 
         this.timer -= dt; 
@@ -149,7 +179,7 @@ export default class GameManager extends cc.Component {
         
         if (this.timer <= 0) {
             this.timer = 0;
-            this.isGameEnded = true; // 🎯 鎖死遊戲狀態，解決時間歸零的無限迴圈 Bug
+            this.isGameEnded = true; 
             this.gameOver(); 
         }
     }
@@ -158,4 +188,5 @@ export default class GameManager extends cc.Component {
         if (this.scoreLabel) this.scoreLabel.string = `Score: ${this.score}`;
         if (this.lifeLabel) this.lifeLabel.string = `Life: ${this.life}`;
     }
+    
 }

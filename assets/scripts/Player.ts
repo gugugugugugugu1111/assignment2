@@ -4,18 +4,31 @@ import GameManager from "./GameManager";
 @ccclass
 export default class Player extends cc.Component {
     @property
-    public jumpForce: number = 900; // 2.4.x 物理引擎所需數值較大
+    public jumpForce: number = 900; 
     @property
     public moveSpeed: number = 400;
     @property
     public minX: number = -600;
 
+    @property(cc.AudioClip)
+    public jumpClip: cc.AudioClip | null = null;
+
+    @property(cc.AudioClip)
+    public growClip: cc.AudioClip | null = null;
+
+    @property(cc.AudioClip)
+    public shrinkClip: cc.AudioClip | null = null;
+
     private rb: cc.RigidBody | null= null;
     private moveDirection: number = 0;
     private isFallingOut: boolean = false;
-
+    private anim: cc.Animation | null = null;
+    private currentAnim: string = "";
+    private originalScaleX: number = 1;
     onLoad () {
         this.rb = this.getComponent(cc.RigidBody);
+        this.anim = this.getComponent(cc.Animation);
+        this.originalScaleX = Math.abs(this.node.scaleX);
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
     }
@@ -38,10 +51,10 @@ export default class Player extends cc.Component {
             case cc.macro.KEY.w:
             case cc.macro.KEY.up:
             case cc.macro.KEY.space:
-                // 加上 if (this.rb) 確保安全
                 if (this.rb) {
                     if (Math.abs(this.rb.linearVelocity.y) < 0.1) {
                         this.rb.linearVelocity = cc.v2(this.rb.linearVelocity.x, this.jumpForce);
+                        if (this.jumpClip) cc.audioEngine.playEffect(this.jumpClip, false);
                     }              
                 }
                 break;
@@ -66,23 +79,68 @@ export default class Player extends cc.Component {
         if (this.node.x < this.minX) {
             this.node.x = this.minX;
         }
-        // 掉出地圖外扣命
         if (this.node.y < -500 && !this.isFallingOut) {
             this.isFallingOut = true;
             if (GameManager.instance) {
                 GameManager.instance.loseLife();
             }
         }
+
+        if (this.moveDirection > 0) {
+            this.node.scaleX = this.originalScaleX;
+        } else if (this.moveDirection < 0) {
+            this.node.scaleX = -this.originalScaleX;
+        }
+        let animState = "idle"; 
+        if(this.rb){
+            if (Math.abs(this.rb.linearVelocity.y) > 0.1) {
+                animState = "jump"; 
+            } else if (this.moveDirection !== 0) {
+                animState = "walk"; 
+            }
+        }
+        
+
+        if (this.anim && this.currentAnim !== animState) {
+            this.anim.play(animState);
+            this.currentAnim = animState;
+        }
     }
 
     public bounce () {
-        // 加上 if (this.rb) 確保安全
         if (this.rb) {
             this.rb.linearVelocity = cc.v2(this.rb.linearVelocity.x, this.jumpForce * 0.8);
         }
     }
     public resetFallFlag() {
         this.isFallingOut = false;
+    }
+
+    public grow() {
+    this.originalScaleX *= 2; 
+    if (this.growClip) {
+            cc.audioEngine.playEffect(this.growClip, false);
+        }
+    cc.tween(this.node)
+        .to(0.2, { scale: this.originalScaleX * 1.2 }, { easing: 'backOut' }) 
+        .to(0.1, { scale: this.originalScaleX }) 
+        .start();
+    this.scheduleOnce(() => {
+            this.shrink();
+        }, 10);
+    cc.log("瑪利歐成長了！新的縮放基準為: " + this.originalScaleX);
+    }
+    public shrink() {
+
+
+        this.originalScaleX /= 2; 
+
+        cc.tween(this.node)
+            .to(0.2, { scale: this.originalScaleX * 0.8 }, { easing: 'backOut' }) 
+            .to(0.1, { scale: this.originalScaleX }) 
+            .start();
+
+        cc.log("10秒到了，瑪利歐變回原狀！");
     }
 }
 

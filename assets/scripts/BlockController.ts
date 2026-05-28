@@ -1,8 +1,21 @@
 const {ccclass, property} = cc._decorator;
 
+
+
+
 @ccclass
 export default class BlockController extends cc.Component {
     private isTriggered: boolean = false;
+    @property(cc.SpriteFrame)
+    emptyBlockSprite: cc.SpriteFrame | null = null;
+    @property(cc.SpriteFrame)
+    originBlockSprite: cc.SpriteFrame | null = null;
+
+    @property(cc.String)
+    spinAnimName: string = "block";
+
+    @property(cc.AudioClip)
+    hitSound: cc.AudioClip | null = null;
 
     onBeginContact (contact: cc.PhysicsContact, selfCollider: cc.PhysicsCollider, otherCollider: cc.PhysicsCollider) {
         if (this.isTriggered) return;
@@ -11,8 +24,6 @@ export default class BlockController extends cc.Component {
             const worldManifold = contact.getWorldManifold();
             const normal = worldManifold.normal;
 
-            // 判斷玩家是否從「下方」用頭頂撞磚塊
-            // 當玩家向上撞擊靜態磚塊時，法向量 normal.y 通常會接近 1 或 -1 (依群組順序而定)
             if (Math.abs(normal.y) > 0.5 && otherCollider.node.y < this.node.y) {
                 this.isTriggered = true;
                 this.boxTriggered();
@@ -22,16 +33,31 @@ export default class BlockController extends cc.Component {
 
     boxTriggered () {
         cc.log("問號磚塊被頂到了！");
-        
-        // 評分項：讓瑪利歐變大 (Scale 變成 1.5 倍) 
+
+        if (this.hitSound) {
+            cc.audioEngine.playEffect(this.hitSound, false);
+        }
         let playerNode = cc.find("Canvas/Player"); 
         if (playerNode) {
-            // 播放頂磚塊微微往上彈一下的動畫效果（自由發揮，或直接變大）
-            playerNode.runAction(cc.scaleTo(0.2, 3, 3)); 
+            let playerScript = playerNode.getComponent("Player");
+            if (playerScript) {
+                (playerScript as any).grow(); 
+            }
         }
 
-        // 頂過之後可以換成「被頂過的空磚塊」圖片
-        // let sprite = this.getComponent(cc.Sprite);
-        // if (sprite) sprite.spriteFrame = ...
+        let anim = this.getComponent(cc.Animation);
+        if (anim) {
+            anim.play(this.spinAnimName);
+        }
+
+        let sprite = this.getComponent(cc.Sprite);
+        if (sprite && this.emptyBlockSprite !== null) {
+            sprite.spriteFrame = this.emptyBlockSprite;
+        }
+
+        cc.tween(this.node)
+            .by(0.1, { y: 15 }, { easing: 'quadOut' }) 
+            .by(0.1, { y: -15 }, { easing: 'quadIn' }) 
+            .start();
     }
 }
