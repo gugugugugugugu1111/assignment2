@@ -7,9 +7,12 @@ export default class Player extends cc.Component {
     public jumpForce: number = 900; // 2.4.x 物理引擎所需數值較大
     @property
     public moveSpeed: number = 400;
+    @property
+    public minX: number = -600;
 
     private rb: cc.RigidBody | null= null;
     private moveDirection: number = 0;
+    private isFallingOut: boolean = false;
 
     onLoad () {
         this.rb = this.getComponent(cc.RigidBody);
@@ -33,6 +36,7 @@ export default class Player extends cc.Component {
                 this.moveDirection = 1;
                 break;
             case cc.macro.KEY.w:
+            case cc.macro.KEY.up:
             case cc.macro.KEY.space:
                 // 加上 if (this.rb) 確保安全
                 if (this.rb) {
@@ -59,9 +63,12 @@ export default class Player extends cc.Component {
         if (this.rb) {
             this.rb.linearVelocity = cc.v2(this.moveDirection * this.moveSpeed, this.rb.linearVelocity.y);
         }
-
+        if (this.node.x < this.minX) {
+            this.node.x = this.minX;
+        }
         // 掉出地圖外扣命
-        if (this.node.y < -500) {
+        if (this.node.y < -500 && !this.isFallingOut) {
+            this.isFallingOut = true;
             if (GameManager.instance) {
                 GameManager.instance.loseLife();
             }
@@ -74,4 +81,8 @@ export default class Player extends cc.Component {
             this.rb.linearVelocity = cc.v2(this.rb.linearVelocity.x, this.jumpForce * 0.8);
         }
     }
+    public resetFallFlag() {
+        this.isFallingOut = false;
+    }
 }
+

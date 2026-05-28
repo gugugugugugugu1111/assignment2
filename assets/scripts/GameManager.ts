@@ -16,6 +16,7 @@ export default class GameManager extends cc.Component {
     @property(cc.Node)
     public gameOverPanel: cc.Node | null = null;
 
+    private isInvincible: boolean = false;  
     private score: number = 0;
     private life: number = 3;
     private spawnPos: cc.Vec2 | null= null;
@@ -31,6 +32,9 @@ export default class GameManager extends cc.Component {
         if (this.playerNode) {
             this.spawnPos = this.playerNode.getPosition();
         }
+        if (this.gameOverPanel) {
+            this.gameOverPanel.active = false;
+        }
         this.updateUI();
     }
 
@@ -40,23 +44,41 @@ export default class GameManager extends cc.Component {
     }
 
     public loseLife() {
-        this.life -= 1;
+       if (this.isInvincible) return;
+
+        this.isInvincible = true; // 開啟無敵鎖
+        this.life--;
+
+        // 🎯 修正點 2：強制血量最小為 0，防止 UI 顯示負數
+        if (this.life < 0) this.life = 0;
+    
         this.updateUI();
-        
+
         if (this.life <= 0) {
             this.gameOver();
         } else {
             this.respawnPlayer();
+        
+            // 🎯 修正點 3：1 秒後自動解除無敵狀態，讓玩家可以再次受傷
+            this.scheduleOnce(() => {
+                this.isInvincible = false;
+            }, 1.0);
         }
     }
 
     private respawnPlayer() {
         if (this.playerNode && this.spawnPos) {
             this.playerNode.setPosition(this.spawnPos);
-            let rb = this.playerNode.getComponent(cc.RigidBody);
-            if (rb) {
-                rb.linearVelocity = cc.v2(0, 0);
+            
+            // 取得 PlayerController 組件並重置掉落鎖
+            let pc = this.playerNode.getComponent("Player") as any;
+            if (pc) {
+                pc.resetFallFlag(); // 🎯 修正點 6：瑪利歐回到地面了，解除掉落鎖
             }
+
+            // 順便把重力速度歸零，防止瑪利歐重生時帶有向下衝的慣性
+            let rb = this.playerNode.getComponent(cc.RigidBody);
+            if (rb) rb.linearVelocity = cc.v2(0, 0);
         }
     }
 
