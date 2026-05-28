@@ -43,21 +43,22 @@ export default class FirebaseManager extends cc.Component {
             });
     }
 
-    // 將這個函數開放給 GameManager 呼叫
     public saveScore(score: number, time: number) {
         if (!this.db) return;
         
         const user = firebase.auth().currentUser;
         if (user) {
-            // 寫入資料庫
+            const name = user.displayName || "anonymous";
+
             this.db.ref('leaderboard/' + user.uid).set({
+                username: name, 
                 score: score,
                 time: time,
                 timestamp: Date.now()
             }).then(() => {
-                cc.log("分數上傳成功！");
+                cc.log("分數與名稱上傳成功！");
             }).catch((error: any) => {
-                cc.error("分數上傳失敗:", error);
+                cc.error("上傳失敗:", error);
             });
         }
     }
