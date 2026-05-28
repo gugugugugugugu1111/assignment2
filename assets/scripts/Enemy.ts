@@ -50,7 +50,7 @@ export default class Enemy extends cc.Component {
                 }
                 
                 if (GameManager.instance) {
-                    GameManager.instance.addScore(100);
+                    GameManager.instance.addScore(500);
                 }
                 this.node.destroy();
             } else {

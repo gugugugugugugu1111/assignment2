@@ -4,7 +4,6 @@ const {ccclass, property} = cc._decorator;
 export default class BlockController extends cc.Component {
     private isTriggered: boolean = false;
 
-    // ⚠️ 記得去該磚塊的 PhysicsBoxCollider 把 Enabled Contact Listener 打勾！
     onBeginContact (contact: cc.PhysicsContact, selfCollider: cc.PhysicsCollider, otherCollider: cc.PhysicsCollider) {
         if (this.isTriggered) return;
 
@@ -14,7 +13,7 @@ export default class BlockController extends cc.Component {
 
             // 判斷玩家是否從「下方」用頭頂撞磚塊
             // 當玩家向上撞擊靜態磚塊時，法向量 normal.y 通常會接近 1 或 -1 (依群組順序而定)
-            if (normal.y > 0.7 || normal.y < -0.7) {
+            if (Math.abs(normal.y) > 0.5 && otherCollider.node.y < this.node.y) {
                 this.isTriggered = true;
                 this.boxTriggered();
             }
